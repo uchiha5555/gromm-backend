@@ -1,3 +1,4 @@
 *.key
 *.crt
 /node_modules
+.env
