@@ -24,7 +24,7 @@ module.exports.signup = async (req, res, next) => {
       email,
       password,
       username,
-      avatar: "avatar",
+      avatar: "avatar.png",
       cover: "cover",
       followers: [],
       following: [],
