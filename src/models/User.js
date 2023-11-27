@@ -77,8 +77,9 @@ UserSchema.methods.generateAcessToken = function () {
   const accessToken = jwt.sign(
     {
       _id: user._id.toString(),
-      fullName: `${user.firstName} ${user.lastName}`,
+      fullName: `${user.firstname} ${user.lastname}`,
       username: `${user.username}`,
+      avatar: `${user.avatar}`,
       email: user.email,
     },
     ACCESS_TOKEN.secret,

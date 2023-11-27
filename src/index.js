@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const path = require('path');
 const bodyParser = require("body-parser");
 
 const { LostErrorHandler } = require("./config/exceptionHandlers/handler.js");
@@ -23,6 +24,7 @@ const PORT = process.env.PORT || 8000;
 // app.options("*", cors(corsOptions));
 app.use(cors("*"));
 app.use(bodyParser.json());
+app.use(express.static('upload'));
 
 /* 
   3. APPLICATION ROUTES 🛣️
@@ -32,6 +34,7 @@ app.use(bodyParser.json());
 app.get("/", function (req, res) {
   res.send("Hello Welcome to API🙃 !!");
 });
+
 
 // App modular routes
 app.use("/api", routes);
