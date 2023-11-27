@@ -3,8 +3,8 @@ const { body } = require("express-validator");
 const User = require("../models/User");
 
 module.exports.signupValidator = [
-  body("firstName").trim().notEmpty().withMessage("Firstname CANNOT be empty"),
-  body("lastName").trim().notEmpty().withMessage("Lastname CANNOT be empty"),
+  body("firstname").trim().notEmpty().withMessage("Firstname CANNOT be empty"),
+  body("lastname").trim().notEmpty().withMessage("Lastname CANNOT be empty"),
   body("email")
     .trim()
     .notEmpty()
@@ -20,17 +20,16 @@ module.exports.signupValidator = [
         throw new Error("E-mail already in use");
       }
     }),
-  body("userName")
+  body("username")
     .trim()
     .notEmpty()
     .withMessage("UserName CANNOT be empty")
     .bail()
-    .isLength({ min: 4 })
     .withMessage("UserName MUST be at least 4 characters long")
     .bail()
-    .custom(async (userName) => {
+    .custom(async (username) => {
       // Finding if email exists in Database
-      const userNameExists = await User.findOne({ userName });
+      const userNameExists = await User.findOne({ username });
       if (userNameExists) {
         throw new Error("UserName already in use");
       }
@@ -41,7 +40,7 @@ module.exports.signupValidator = [
     .bail()
     .isLength({ min: 4 })
     .withMessage("Password MUST be at least 4 characters long"),
-  body("lastName").trim().notEmpty().withMessage("Lastname CANNOT be empty"),
+  body("lastname").trim().notEmpty().withMessage("Lastname CANNOT be empty"),
 ];
 
 module.exports.loginValidator = [

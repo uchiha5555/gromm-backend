@@ -15,10 +15,10 @@ const ACCESS_TOKEN = {
 const User = mongoose.Schema;
 
 const UserSchema = new User({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
+  firstname: { type: String, required: true },
+  lastname: { type: String, required: true },
   email: { type: String, required: true },
-  userName: {
+  username: {
     type: String,
     required: true,
   },
@@ -26,11 +26,11 @@ const UserSchema = new User({
     type: String,
     required: true,
   },
-  userImage: {
+  avatar: {
     type: String,
     required: true,
   },
-  userCover: {
+  cover: {
     type: String,
     required: true,
   },
@@ -46,7 +46,7 @@ const UserSchema = new User({
       required: true,
     },
   ],
-  userBio: {
+  bio: {
     type: String,
     required: true,
   },
@@ -78,6 +78,7 @@ UserSchema.methods.generateAcessToken = function () {
     {
       _id: user._id.toString(),
       fullName: `${user.firstName} ${user.lastName}`,
+      username: `${user.username}`,
       email: user.email,
     },
     ACCESS_TOKEN.secret,
@@ -92,23 +93,6 @@ UserSchema.methods.generateAcessToken = function () {
 /* 
 4. ATTACH CUSTOM STATIC METHODS
  */
-UserSchema.statics.findByCredentials = async (email, password) => {
-  const user = await UserModel.findOne({ email });
-  if (!user)
-    throw new CustomError(
-      "Wrong credentials!",
-      400,
-      "Email or password is wrong!"
-    );
-  const passwdMatch = await bcrypt.compare(password, user.password);
-  if (!passwdMatch)
-    throw new CustomError(
-      "Wrong credentials!!",
-      400,
-      "Email or password is wrong!"
-    );
-  return user;
-};
 
 /* 
 5. COMPILE MODEL FROM SCHEMA

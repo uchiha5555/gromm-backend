@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
-
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const CustomError = require("../config/errors/CustomError");
 
 const User = require("../models/User");
@@ -14,20 +15,20 @@ module.exports.signup = async (req, res, next) => {
     if (!errors.isEmpty()) {
       throw new CustomError(errors.array(), 422, errors.array()[0]?.msg);
     }
-    const { firstName, lastName, email, password, userName } = req.body;
+    const { firstname, lastname, email, password, username } = req.body;
 
     /* Custom methods on newUser are defined in User model */
     const newUser = new User({
-      firstName,
-      lastName,
+      firstname,
+      lastname,
       email,
       password,
-      userName,
-      userImage: "userImage",
-      userCover: "userCover",
+      username,
+      avatar: "avatar",
+      cover: "cover",
       followers: [],
       following: [],
-      userBio: "GROMM User",
+      bio: "GROMM User",
     });
     await newUser.save(); // Save new User to DB
 
@@ -58,7 +59,17 @@ module.exports.login = async (req, res, next) => {
     const { email, password } = req.body;
 
     /* Custom methods on user are defined in User model */
-    const user = await User.findByCredentials(email, password); // Identify and retrieve user by credentials
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.json({ success: false, message: 'User not exists' });
+      return;
+    }
+    const passwdMatch = await bcrypt.compare(password, user.password);
+    if (!passwdMatch) {
+      res.json({ success: false, message: 'Wrong email or password' });
+      return;
+    }
+
     const aTkn = await user.generateAcessToken(); // Create Access Token
 
     // Send Response on successful Login

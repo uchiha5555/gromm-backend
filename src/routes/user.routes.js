@@ -22,6 +22,6 @@ router.post("/signup", validators.signupValidator, userControllers.signup);
  * @param {string} path - /api/users/login
  * @description - User Login
  */
-router.post("/login", validators.loginValidator, userControllers.login);
+router.post("/signin", validators.loginValidator, userControllers.login);
 
 module.exports = router;
