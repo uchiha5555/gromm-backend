@@ -1,27 +1,28 @@
 const express = require("express");
-
-const validators = require("../validators/user-validators");
-const userControllers = require("../controllers/user.controller");
-
 const router = express.Router();
+const multer = require('multer');
+
+const storageEngine = multer.diskStorage({
+  destination: "upload/",
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}--${file.originalname}`);
+  },
+});
+
+const upload = multer({
+  storage: storageEngine,
+});
+
+
+const user = require('../controllers/user.controller.js');
+const Authenticate = require('../service/authMiddleware.js');
 
 // TEST Route
 router.get("/", function (req, res) {
   res.send("Hello /api/users routing works 🥂!!");
 });
 
-/**
- * @method - POST
- * @param {string} path - /api/users/signup
- * @description - User Signup
- */
-router.post("/signup", validators.signupValidator, userControllers.signup);
-
-/**
- * @method - POST
- * @param {string} path - /api/users/login
- * @description - User Login
- */
-router.post("/signin", validators.loginValidator, userControllers.login);
+router.post('/save', user.save);
+router.post('/upload', upload.array('file'), user.upload);
 
 module.exports = router;

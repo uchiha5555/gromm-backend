@@ -1,85 +1,39 @@
-const { validationResult } = require("express-validator");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const CustomError = require("../config/errors/CustomError");
+const fs = require('fs');
+const User = require('../models/User');
 
-const User = require("../models/User");
+module.exports.index = async (req, res) => {};
 
-/*
-  1. SIGN UP USER 
-*/
+module.exports.save = async (req, res) => {
+    User.findById(req.body.id).then(model => {
+        model.username = req.body.username;
+        model.displayName = req.body.displayName;
+        model.url = req.body.url;
+        model.bio = req.body.bio;
+        model.save().then(err => {
+            const accessToken = model.generateAccessToken();
 
-module.exports.signup = async (req, res, next) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      throw new CustomError(errors.array(), 422, errors.array()[0]?.msg);
-    }
-    const { firstname, lastname, email, password, username } = req.body;
-
-    /* Custom methods on newUser are defined in User model */
-    const newUser = new User({
-      firstname,
-      lastname,
-      email,
-      password,
-      username,
-      avatar: "avatar.png",
-      cover: "cover",
-      followers: [],
-      following: [],
-      bio: "GROMM User",
-    });
-    await newUser.save(); // Save new User to DB
-
-    const aTkn = await newUser.generateAcessToken(); // Create Access Token
-
-    // Send Response on successful Sign Up
-    res.status(201).json({
-      success: true,
-      user: newUser,
-      accessToken: aTkn,
-    });
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
+            res.json({ success: true, model, accessToken });
+        })
+    })
 };
 
-/*
-  2. LOGIN USER
-*/
-module.exports.login = async (req, res, next) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      throw new CustomError(errors.array(), 422, errors.array()[0]?.msg);
-    }
+module.exports.upload = async (req, res) => {
+    User.findById(req.body.id).then(model => {
+        if (model.avatar !== 'avatar.png' && req.body.flag === '1') {
+            fs.unlink(`upload/${model.avatar}`, err => console.log(err));
+        }
+        else if (model.cover !== 'cover.png' && req.body.flag === '2') {
+            fs.unlink(`upload/${model.cover}`, err => console.log(err));
+        }
 
-    const { email, password } = req.body;
-
-    /* Custom methods on user are defined in User model */
-    const user = await User.findOne({ email });
-    if (!user) {
-      res.json({ success: false, message: 'User not exists' });
-      return;
-    }
-    const passwdMatch = await bcrypt.compare(password, user.password);
-    if (!passwdMatch) {
-      res.json({ success: false, message: 'Wrong email or password' });
-      return;
-    }
-
-    const aTkn = await user.generateAcessToken(); // Create Access Token
-
-    // Send Response on successful Login
-    res.json({
-      success: true,
-      user,
-      accessToken: aTkn,
-    });
-  } catch (error) {
-    console.log(error);
-    next(error);
-  }
-};
+        if (req.body.flag === '1') {
+            model.avatar = `${req.files[0].filename}`;
+        }
+        else if (req.body.flag === '2') {
+            model.cover = `${req.files[0].filename}`;
+        }
+        model.save().then(err => {
+            res.json({ success: true, accessToken: model.generateAccessToken() });
+        });
+    })
+}

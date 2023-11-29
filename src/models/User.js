@@ -15,41 +15,18 @@ const ACCESS_TOKEN = {
 const User = mongoose.Schema;
 
 const UserSchema = new User({
-  firstname: { type: String, required: true },
-  lastname: { type: String, required: true },
-  email: { type: String, required: true },
-  username: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  avatar: {
-    type: String,
-    required: true,
-  },
-  cover: {
-    type: String,
-    required: true,
-  },
-  followers: [
-    {
-      type: String,
-      required: true,
-    },
-  ],
-  following: [
-    {
-      type: String,
-      required: true,
-    },
-  ],
-  bio: {
-    type: String,
-    required: true,
-  },
+  firstname: { type: String, required: true, trim: true },
+  lastname: { type: String, required: true, trim: true },
+  email: { type: String, required: true, trim: true },
+  username: { type: String, required: true, trim: true },
+  displayName: { type: String, trim: true },
+  password: { type: String, required: true, trim: true },
+  avatar: { type: String, required: true, trim: true },
+  cover: { type: String, required: true, trim: true },
+  url: { type: String, required: true, trim: true },
+  followers: [{ type: mongoose.Types.ObjectId, ref: 'User' }],
+  following: [{ type: mongoose.Types.ObjectId, ref: 'User' }],
+  bio: { type: String, trim: true },
 });
 
 /* 
@@ -70,16 +47,22 @@ UserSchema.pre("save", async function (next) {
 /* 
 3. ATTACH CUSTOM INSTANCE METHODS
  */
-UserSchema.methods.generateAcessToken = function () {
+UserSchema.methods.generateAccessToken = function () {
   const user = this;
 
   // Create signed access token
   const accessToken = jwt.sign(
     {
-      _id: user._id.toString(),
-      fullName: `${user.firstname} ${user.lastname}`,
+      id: user._id.toString(),
+      fullName: `${user.firstname[0]}.${user.lastname}`,
+      firstname: `${user.firstname}`,
+      lastname: `${user.lastname}`,
       username: `${user.username}`,
+      displayName: `${user.displayName}`,
+      url: `${user.url}`,
+      bio: `${user.bio}`,
       avatar: `${user.avatar}`,
+      cover: `${user.cover}`,
       email: user.email,
     },
     ACCESS_TOKEN.secret,
