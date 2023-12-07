@@ -2,7 +2,7 @@ const fs = require('fs');
 const User = require('../models/User');
 
 module.exports.index = async (req, res) => {
-    User.findOne({ url: req.body.url }).then(model => {
+    User.findOne({ username: req.body.username }).then(model => {
         if (model) {
             model.populate('posts', err => {
                 res.json({ success: true, model });
@@ -14,17 +14,24 @@ module.exports.index = async (req, res) => {
 };
 
 module.exports.save = async (req, res) => {
-    User.findById(req.body.id).then(model => {
-        model.username = req.body.username;
-        model.displayName = req.body.displayName;
-        model.url = req.body.url;
-        model.bio = req.body.bio;
-        model.save().then(err => {
-            const accessToken = model.generateAccessToken();
-
-            res.json({ success: true, model, accessToken });
-        })
-    })
+    User.findOne({ username: req.body.username }).then(exist_user => {
+        if (exist_user) {
+            res.json({ success: false, message: 'Username already exists!' });
+            return;
+        }
+        User.findById(req.body.id).then(model => {
+            model.firstname = req.body.firstname ? req.body.firstname : model.firstname;
+            model.lastname = req.body.lastname ? req.body.lastname : model.lastname;
+            model.displayName = req.body.displayName;
+            model.username = req.body.username;
+            model.bio = req.body.bio;
+            model.save().then(err => {
+                const accessToken = model.generateAccessToken();
+    
+                res.json({ success: true, model, accessToken });
+            });
+        });
+    });
 };
 
 module.exports.remove = async (req, res) => {
@@ -32,7 +39,7 @@ module.exports.remove = async (req, res) => {
 }
 
 module.exports.follow = async (req, res) => {
-    User.findOne({ url: req.body.url }).then(user => {
+    User.findOne({ username: req.body.username }).then(user => {
         if (user.followers.includes(req.body.id)) {
             const followers_temp = user.followers.filter(p => p.toString() !== req.body.id);
             user.followers = followers_temp;
