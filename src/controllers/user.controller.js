@@ -14,8 +14,8 @@ module.exports.index = async (req, res) => {
 };
 
 module.exports.save = async (req, res) => {
-    User.findOne({ username: req.body.username }).then(exist_user => {
-        if (exist_user) {
+    User.find({ username: req.body.username }).then(exist_user => {
+        if (exist_user.length > 1) {
             res.json({ success: false, message: 'Username already exists!' });
             return;
         }
