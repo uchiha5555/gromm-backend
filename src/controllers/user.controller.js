@@ -88,7 +88,7 @@ module.exports.upload = async (req, res) => {
         model.save().then(err => {
             res.json({ success: true, accessToken: model.generateAccessToken() });
         });
-    })
+    });
 }
 
 module.exports.remove_image = async (req, res) => {
