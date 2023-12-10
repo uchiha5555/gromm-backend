@@ -4,13 +4,13 @@ const User = require('../models/User');
 const useRandomGenerator = require('../service/randomGenerator');
 
 module.exports.index = (req, res) => {
-    Bracket.find().sort({ createdAt: -1 }).populate('posts').then(model => {
+    Bracket.find().sort({ createdAt: -1 }).populate('creator').then(model => {
         res.json({ success: true, model });
     });
 }
 
 module.exports.save = (req, res) => {
-    const { id, user, title, start_date, voting_date, details, prizes, rules, max_player } = req.body;
+    const { id, user, title, start_date, vote_date, details, prizes, rules, max_player } = req.body;
     let url = useRandomGenerator();
 
     Bracket.findById(id).then(model => {
@@ -19,7 +19,7 @@ module.exports.save = (req, res) => {
         }
         model.title = title;
         model.start_date = start_date;
-        model.vote_date = voting_date;
+        model.vote_date = vote_date;
         model.creator = user;
         model.details = details;
         model.prizes = prizes;
@@ -28,7 +28,7 @@ module.exports.save = (req, res) => {
         model.url = url;
         model.banner = 'banner.png';
         model.save().then(err => {
-            model.populate('posts', err => {
+            model.populate('creator', err => {
                 res.json({ success: true, model });
             })
         });
@@ -50,7 +50,7 @@ module.exports.upload_image = (req, res) => {
         }
         model.banner = req.files[0].filename;
         model.save().then(err => {
-            model.populate('posts', err => {
+            model.populate('creator', err => {
                 res.json({ success: true, model });
             });
         });
@@ -63,13 +63,13 @@ module.exports.remove_image = async (req, res) => {
             fs.unlink(`upload/${model.banner}`, err => {
                 model.banner = 'banner.png';
                 model.save().then(err => {
-                    model.populate('posts', err => {
+                    model.populate('creator', err => {
                         res.json({ success: true, model });
                     });
                 });
             });
         } else {
-            model.populate('posts', err => {
+            model.populate('creator', err => {
                 res.json({ success: true, model });
             });
         }
@@ -77,7 +77,7 @@ module.exports.remove_image = async (req, res) => {
 }
 
 module.exports.getByUrl = async (req, res) => {
-    Bracket.findOne({ url: req.params.url }).populate('posts').then(model => {
+    Bracket.findOne({ url: req.params.url }).populate('creator').then(model => {
         if (model)
             res.json({ success: true, model });
         else
