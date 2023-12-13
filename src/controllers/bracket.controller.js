@@ -21,9 +21,9 @@ module.exports.save = (req, res) => {
         model.start_date = start_date;
         model.vote_date = vote_date;
         model.creator = user;
-        model.details = details;
-        model.prizes = prizes;
-        model.rules = rules;
+        model.details = details ? details : '';
+        model.prizes = prizes ? prizes : '';
+        model.rules = rules ? rules : '';
         model.max_player = max_player;
         model.url = url;
         model.banner = 'banner.png';
